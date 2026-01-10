@@ -1,0 +1,70 @@
+README
+
+Omada Controller systemd service files
+
+Developed using Debian 13 base install and installing Omada Controller 6.0.0.25 as per TPLink instructions.
+Due to my target environment not supporting new MondoDB used MongoDB 4.4.18
+
+There may be variables in the generated omadaenv file that are not needed by the service.
+But, not knowing the internal Omada Controller requirements, I left them in as they are
+in the tpeap script.
+
+Note the dash at the begining of the EnvironmentFile value. This instructs systemd to initially
+ignore if the file is missing. But, it will attempt to process the file prior to ExecStart.
+
+Some values in the Environment File could not be used in the service file. I.e. User and Group will not
+process variables. Hence these are hardcoded in the service file as is the EnvironmentFile value.
+
+I have tested this in a VirtualBox environment and my target SBC system and it successfully starts on boot
+and will stop and restart. I have made no attempt to implement the version option that tpeap provides.
+
+I hope someone finds this useful. Feel free to use and modify as you like.
+
+sudo chown root:root omada.service
+sudo cp omada.service /etc/systemd/system/
+sudo chown root:root omadaenv.sh 
+sudo cp omadaenv.sh /usr/bin/
+sudo systemctl stop omada
+sudo mv /usr/bin/tpeap ~/
+sudo rm /etc/init.d/tpeap
+sudo systemctl daemon-reload
+sudo systemctl start omada
+
+It will return quickly but, will take a few minutes to fully start.
+
+sudo systemctl status omada
+
+● omada.service - LSB: Omada Controller
+     Loaded: loaded (/etc/systemd/system/omada.service; enabled; preset: enabled)
+     Active: active (running) since Sat 2026-01-10 09:46:19 EST; 4h 18min ago
+ Invocation: a6ea1ba345a84c6db7b402a31998c84f
+    Process: 10403 ExecStartPre=/usr/bin/omadaenv.sh (code=exited, status=0/SUCCESS)
+   Main PID: 10410 (java)
+      Tasks: 339 (limit: 2134)
+     Memory: 1.3G (peak: 1.5G)
+        CPU: 42min 28.654s
+     CGroup: /system.slice/omada.service
+             ├─10410 /usr/bin/java -server -XX:MaxHeapFreeRatio=60 -XX:MinHeapFreeRatio=30 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/opt/tplink/EAPContr>
+             ├─10478 sh -c "\"/opt/tplink/EAPController/bin/mongod\" --port 27217 --dbpath \"../data/db\" -pidfilepath \"../data/mongo.pid\" --logappend --logpa>
+             └─10479 /opt/tplink/EAPController/bin/mongod --port 27217 --dbpath ../data/db -pidfilepath ../data/mongo.pid --logappend --logpath ../logs/mongod.l>
+
+Jan 10 09:46:18 omada-controller systemd[1]: Starting omada.service - LSB: Omada Controller...
+Jan 10 09:46:19 omada-controller systemd[1]: Started omada.service - LSB: Omada Controller.
+Jan 10 09:47:01 omada-controller java[10410]:   .   ____          _            __ _ _
+Jan 10 09:47:01 omada-controller java[10410]:  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+Jan 10 09:47:01 omada-controller java[10410]: ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+Jan 10 09:47:01 omada-controller java[10410]:  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+Jan 10 09:47:01 omada-controller java[10410]:   '  |____| .__|_| |_|_| |_\__, | / / / /
+Jan 10 09:47:01 omada-controller java[10410]:  =========|_|==============|___/=/_/_/_/
+Jan 10 09:47:01 omada-controller java[10410]:  :: Spring Boot ::                (v3.4.2)
+
+If it all looks good.
+sudo systemctl enable omada
+
+sudo reboot
+
+Once up and running
+
+sudo systemctl status omada
+
+Done.

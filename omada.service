@@ -1,0 +1,29 @@
+[Unit]
+Description=LSB: Omada Controller
+Before=multi-user.target
+Before=graphical.target
+After=remote-fs.target
+After=network-online.target
+Wants=network-online.target
+# 
+[Service]
+Type=exec
+EnvironmentFile=-/opt/tplink/EAPController/data/omadaenv
+Restart=no
+TimeoutSec=5min
+IgnoreSIGPIPE=no
+KillMode=process
+GuessMainPID=no
+RemainAfterExit=yes
+SuccessExitStatus=5 6
+User=omada
+Group=omada
+PIDFile=/run/omada.pid
+WorkingDirectory=/opt/tplink/EAPController/work
+ExecStartPre=/usr/bin/omadaenv.sh
+ExecStart=/usr/bin/java $JAVA_OPTS $MAIN_CLASS start
+ExecStop=/usr/bin/java $JAVA_OPTS $MAIN_CLASS stop
+
+
+[Install]
+WantedBy=multi-user.target
