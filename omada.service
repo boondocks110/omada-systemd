@@ -8,7 +8,7 @@ Wants=network-online.target
 # 
 [Service]
 Type=exec
-EnvironmentFile=-/opt/tplink/EAPController/data/omadaenv
+EnvironmentFile=-/tmp/omada.env
 Restart=no
 TimeoutSec=5min
 IgnoreSIGPIPE=no
@@ -20,10 +20,10 @@ User=omada
 Group=omada
 PIDFile=/run/omada.pid
 WorkingDirectory=/opt/tplink/EAPController/work
-ExecStartPre=/usr/bin/omadaenv.sh
+ExecStartPre=/usr/bin/omadaenv
 ExecStart=/usr/bin/java $JAVA_OPTS $MAIN_CLASS start
 ExecStop=/usr/bin/java $JAVA_OPTS $MAIN_CLASS stop
-
+ExecStopPost=/usr/bin/rm -f /tmp/omada.env
 
 [Install]
 WantedBy=multi-user.target

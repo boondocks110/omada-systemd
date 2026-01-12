@@ -1,0 +1,65 @@
+#!/bin/bash
+ 
+ 
+# Check if EUID is 0 (root)
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: This script requires root privileges. Please run with sudo." >&2
+  exit 1  # Exit with error code 1
+fi
+ 
+# If we reach here, we have root privileges
+echo "Success: Running with root privileges!"
+
+# Check if running systemd
+if [ "(ps -p 1 -o comm=)" =  "systemd" ]; then
+  echo "Error: This system not running systemd" >&2
+  exit 1  # Exit with error code 1
+fi
+
+# Stop omada service if running
+if [ "(systemctl -q is-active omada)" = "active" ]; then
+  echo Stopping omada service
+  systemctl stop omada -q --no-pager
+fi
+
+# If the omada.service file exists, set it to root ownership
+# and copy it to /etc/systemd/system/
+if [ -f 'omada.service' ]; then
+  echo Setting omada.service owner to root
+  chown root:root omada.service
+  echo Copying omada.service to /etc/systemd/system/
+  cp omada.service /etc/systemd/system/
+fi
+
+# Check if omadaenv.sh exists, set executable attribute,
+# Set it to root ownership and copy to /usr/bin/
+if [ -f 'omadaenv' ]; then
+  echo Setting omadaenv execute attribute
+  chmod +x omadaenv
+
+  echo Setting omadaenv ownership to root
+  chown root:root omadaenv 
+
+  echo Copying omadaenv to /usr/bin/
+  cp omadaenv /usr/bin/
+fi
+
+if [ -f "/usr/bin/tpeap" ]; then
+  echo Moving tpeap script to /opt/ as backup
+  mv /usr/bin/tpeap /opt/tpeap
+fi
+
+if [ -f "/etc/init.d/tpeap" ]; then
+  echo removing tpeap script from /etc/init.d
+  rm /etc/init.d/tpeap
+fi
+
+echo Reloading systemd daemon
+systemctl daemon-reload --no-pager
+
+echo Starting systemd version of omada.service
+systemctl start omada -l --no-pager
+
+echo Waiting a few seconds before testing omada service status
+sleep 3s
+systemctl status omada --no-pager
