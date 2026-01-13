@@ -31,7 +31,7 @@ sudo systemctl status omada
      Loaded: loaded (/etc/systemd/system/omada.service; enabled; preset: enabled)
      Active: active (running) since Sat 2026-01-10 09:46:19 EST; 4h 18min ago
  Invocation: a6ea1ba345a84c6db7b402a31998c84f
-    Process: 10403 ExecStartPre=/usr/bin/omadaenv.sh (code=exited, status=0/SUCCESS)
+    Process: 10403 ExecStartPre=/usr/bin/omadaenv (code=exited, status=0/SUCCESS)
    Main PID: 10410 (java)
       Tasks: 339 (limit: 2134)
      Memory: 1.3G (peak: 1.5G)
